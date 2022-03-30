@@ -1,0 +1,81 @@
+#home {
+    background-image: url('../../assets/img/bgd.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: space-around;
+    height: 100vh;
+    width: 100vw;
+    
+    section {
+        background-color: rgba(0,0,0,0.7);
+        padding-left: 2rem;
+        padding-right: 2rem;
+        height: 80%;
+        width: 35%;
+    }
+    .cube {
+        font-size: 3rem;
+        color: orange;
+        text-align: center;
+    }
+    h1 {
+        font-size: $lg;
+        font-weight: 400;
+        text-align: center;
+        color: $off-white;
+    }
+    .play-button-container {
+        width: 100%;
+
+    };
+    
+    a.play-button {
+        background-color: $green;
+        border-radius: $button-radius;
+        color: #fff;
+        display: block;
+        cursor: pointer;
+        padding: $normal;
+        text-align: center;
+        transition: 0.3s linear all;
+    };
+
+    a.play-button:hover{
+        background-color: darken($green, 10%);
+    }
+
+    .auth-container{
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        margin-top: $lg;
+    };
+
+    #login-btn{
+        background-color: red;
+
+    }
+
+    #login-btn:hover {
+        background-color: darken($red, 10%);
+
+    }
+
+    #signup-btn {
+        background: $blue;
+    }
+    #signup-btn:hover {
+        background: darken($blue, 10%);
+    }
+
+    .auth-container .auth-btns{
+        color:#fff;
+        cursor: pointer;
+        border-radius: $button-radius;
+        padding: $normal;
+        text-align: center;
+        transition: 0 .3s linear all;
+        width: 45%;
+    }
+};
