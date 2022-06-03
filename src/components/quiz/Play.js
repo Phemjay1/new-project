@@ -26,8 +26,10 @@ class Play extends Component {
       hints: 5,
       fiftyFifty: 2,
       usedFiftyFifty: false,
+      previousRandomNumbers:[],
       time: {},
     };
+    this.interval = null
   }
 
   componentDidMount() {
@@ -39,7 +41,9 @@ class Play extends Component {
       nextQuestion,
       previousQuestion
     );
+    this.startTimer();
   }
+
   displayQuestions = (
     questions = this.state.questions,
     currentQuestion,
@@ -58,7 +62,9 @@ class Play extends Component {
         nextQuestion,
         previousQuestion,
         numberOfQuesions: questions.length,
+        previousRandomNumbers: [],
         answer,
+      }, ()=>{this.showoptions()
       });
     }
   };
@@ -85,7 +91,7 @@ class Play extends Component {
     if (this.state.nextQuestion !== undefined) {
       this.setState(
         (prevState) => ({
-          currentQuestionIndex: prevState.currentQuestionIndex + 1,
+          currentQuestionIndex: prevState.currentQuestionIndex + 1   
         }),
         () => {
           this.displayQuestions(
@@ -121,7 +127,7 @@ class Play extends Component {
   handleQuitButtonClick = () => {
     this.playButtonSound();
     if (window.confirm("Are you sure you want to quit?")) {
-      this.props.history.push("/");
+      this.props.history.push('/');
     }
   };
 
@@ -196,8 +202,130 @@ class Play extends Component {
     );
   };
 
+showoptions = ()=> {
+  const options = Array.from(document.querySelectorAll('.option'));
+  options.forEach(option=>{
+    option.style.visibility = 'visible';
+  });
+  this.setState({
+    usedFiftyFifty: false
+  });
+}
+
+handleHints=() => {
+  if(this.state.hints>0){
+    const options = Array.from(document.querySelectorAll('.option'));
+    let indexOfAnswer;
+  
+    options.forEach((option, index) => {
+      if (option.innerHTML.toLowerCase() === this.state.answer.toLowerCase())
+      {
+        indexOfAnswer= index;
+      }
+    });
+  
+    while (true){
+      const randomNumber = Math.round(Math.random() * 3);
+      if (randomNumber !== indexOfAnswer && !this.state
+        .previousRandomNumbers.includes(randomNumber)   ){
+        options.forEach((option, index) => {
+          if (index === randomNumber){
+            option.style.visibility = 'hidden';
+            this.setState((prevState) => ({
+              hints: prevState.hints - 1,
+              previousRandomNumbers: prevState.previousRandomNumbers
+              .concat(randomNumber )
+            }));
+          }
+        });
+        break;
+      }
+      if (this.state.previousRandomNumbers.length>=3) break;
+    }
+  }
+
+}
+
+handleFiftyFifty = ()=> {
+  if(this.state.fiftyFifty>0 && this.state.usedFiftyFifty === false){
+    const  options = document.querySelectorAll('.option');
+    const randomNumbers = [];
+    let indexOfAnswer;
+
+    options.forEach((option, index)=> {
+      if (option.innerHTML.toLowerCase() === this.state.answer.toLowerCase()){
+        indexOfAnswer =index;
+      }
+    });
+    let count = 0;
+    do{
+      const randomNumber= Math.round(Math.random() * 3);
+      if(randomNumber !== indexOfAnswer){
+        if(randomNumbers.length < 2 && !randomNumbers.includes(randomNumber) && !randomNumbers.includes(indexOfAnswer)){
+           randomNumbers.push(randomNumber);
+           count ++;
+        } else{
+          while (true){
+            const newRandomNumber= Math.round(Math.random() * 3);
+            if (!randomNumbers.includes(newRandomNumber) && !randomNumbers.includes(indexOfAnswer)){
+              randomNumbers.push(newRandomNumber);
+              count ++;
+              break;
+            }
+          }
+        }
+      }
+    } while (count < 2);
+    options.forEach((option, index) => {
+      if (randomNumbers.includes(index)){
+        option.style.visibility = 'hidden';
+      }
+    });
+    this.setState(prevState => ({
+      fiftyFifty: prevState.fiftyFifty -1,
+      usedFiftyFifty: true
+    }) )
+  }
+}
+
+startTimer = () => {
+  const countDownTime = Date.now() + 12000;
+  this.interval = setInterval(() => {
+    const now = new Date();
+    const distance = countDownTime - now;
+
+    const minutes = Math.floor((distance % (1000 * 60 * 60))/(1000*60));
+    const seconds = Math.floor((distance % (1000 * 60))/1000);
+
+    if (distance <  0){
+      clearInterval(this.interval);
+      this.setState({
+        time: {
+          minutes: 0,
+          seconds: 0
+        }
+      }, () => {
+        alert('Your Time has exceeded');
+        this.props.history.push('/')
+      });
+    } else {
+      this.setState({
+        time: {
+          minutes,
+          seconds
+        }
+      })
+    }
+  }, 1000)
+}
+
   render() {
-    const { currentQuestion, currentQuestionIndex, numberOfQuesions } =
+    const { currentQuestion,
+    currentQuestionIndex,
+    fiftyFifty,
+    hints,
+    numberOfQuesions,
+    time } =
       this.state;
     return (
       <Fragment>
@@ -215,16 +343,16 @@ class Play extends Component {
           <h2>Exam mode</h2>
           <div className="lifeline-container">
             <p>
-              <span className="mdi-mdi-set-center mdi-24px lifeline-icon">
+              <span onClick={this.handleFiftyFifty} className="mdi-mdi-set-center mdi-24px lifeline-icon">
                 <Icon path={mdiSetCenter} size={0.8} />
+                <span className="lifeline">{fiftyFifty}</span>
               </span>
-              <span className="lifeline">2</span>
             </p>
             <p>
-              <span className="mdi-mdi-set-center mdi-24px lifeline-icon">
+              <span onClick={this.handleHints}  className="mdi-mdi-set-center mdi-24px lifeline-icon">
                 <Icon path={mdiLightbulb} size={0.8} />
+                <span className="lifeline">{hints}</span>
               </span>
-              <span className="lifeline">5</span>
             </p>
           </div>
           <div className="timer-container">
@@ -232,9 +360,7 @@ class Play extends Component {
               <span className="left" style={{ float: "left" }}>
                 {currentQuestionIndex + 1} of {numberOfQuesions}
               </span>
-              <span className="right">
-                2:15
-                <span className="mdi mdi-clock-outline mdi-24px">
+              <span className="right">{time.minutes}:{time.seconds}<span className="mdi mdi-clock-outline mdi-24px">
                   <Icon path={mdiClock} size={0.8} />
                 </span>
               </span>

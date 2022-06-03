@@ -14,7 +14,7 @@ import options from "../../assets/img/options.png";
 
 const QuizInstructions = () => (
   <Fragment>
-    <HelmetProvider>
+    <HelmetProvider> 
       <Helmet>
         <title>Exam Instructions - Exam App</title>
       </Helmet>
