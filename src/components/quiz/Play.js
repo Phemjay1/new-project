@@ -8,6 +8,8 @@ import isEmpty from "../../utils/is-empty";
 import correctNotification from "../../assets/audio/correct-audio.wav";
 import wrongNotification from "../../assets/audio/wrong-audio.wav";
 import buttonSound from "../../assets/audio/tap-audio.mp3";
+import classnames from 'classnames';
+
 
 class Play extends Component {
   constructor(props) {
@@ -18,18 +20,25 @@ class Play extends Component {
       nextQuestion: {},
       previousQuestion: {},
       answer: "",
-      numberOfQuesion: 0,
-      numberOfAnsweredQuesions: 0,
+      numberOfQuestions: 0,
+      numberOfAnsweredQuestions: 0,
       currentQuestionIndex: 0,
       score: 0,
       correctAnswers: 0,
+      wrongAnswers: 0,
       hints: 5,
       fiftyFifty: 2,
       usedFiftyFifty: false,
+      // hintsUsed: false, 
+      nextButtonDisabled: false,
+      previousButtonDisabled: true,
       previousRandomNumbers:[],
       time: {},
     };
-    this.interval = null
+    this.interval = null;
+    this. correctSound = React.createRef();
+    this. wrongSound = React.createRef();
+    this. buttonSound = React.createRef();
   }
 
   componentDidMount() {
@@ -43,6 +52,9 @@ class Play extends Component {
     );
     this.startTimer();
   }
+componentWillUnmount() {
+  clearInterval(this.interval)
+}
 
   displayQuestions = (
     questions = this.state.questions,
@@ -61,10 +73,12 @@ class Play extends Component {
         currentQuestion,
         nextQuestion,
         previousQuestion,
-        numberOfQuesions: questions.length,
+        numberOfQuestions: questions.length,
         previousRandomNumbers: [],
         answer,
-      }, ()=>{this.showoptions()
+      }, ()=>{
+        this.showoptions()
+        this.handleDisabledButton();
       });
     }
   };
@@ -75,12 +89,12 @@ class Play extends Component {
       this.state.answer.toLocaleLowerCase()
     ) {
       setTimeout(() => {
-        document.getElementById("correct-sound").play();
+        this.correctSound.current.play();
       }, 500);
       this.correctAnswer();
     } else {
       setTimeout(() => {
-        document.getElementById("wrong-sound").play();
+        this.wrongSound.current.play();
       }, 500);
       this.wrongAnswer();
     }
@@ -118,7 +132,7 @@ class Play extends Component {
             this.state.currentQuestion,
             this.state.nextQuestion,
             this.state.previousQuestion
-          );
+          ); 
         }
       );
     }
@@ -151,7 +165,7 @@ class Play extends Component {
   };
 
   playButtonSound = () => {
-    document.getElementById("button-sound").play();
+    this.buttonSound.current.play();
   };
 
   correctAnswer = () => {
@@ -165,15 +179,19 @@ class Play extends Component {
         score: prevState.score + 1,
         correctAnswers: prevState.correctAnswers + 1,
         currentQuestionIndex: prevState.currentQuestionIndex + 1,
-        numberOfAnsweredQuesions: prevState.numberOfAnsweredQuesions + 1,
+        numberOfAnsweredQuestions: prevState.numberOfAnsweredQuestions + 1,
       }),
       () => {
+        if(this.state.nextQuestion === undefined){
+          this.endGame();
+        } else {
         this.displayQuestions(
           this.state.questions,
           this.state.currentQuestion,
           this.state.nextQuestion,
           this.state.previousQuestion
         );
+        }
       }
     );
   };
@@ -189,17 +207,20 @@ class Play extends Component {
       (prevState) => ({
         wrongAnswers: prevState.wrongAnswers + 1,
         currentQuestionIndex: prevState.currentQuestionIndex + 1,
-        numberOfAnsweredQuesions: prevState.numberOfAnsweredQuesions,
+        numberOfAnsweredQuestions: prevState.numberOfAnsweredQuestions + 1
       }),
       () => {
+        if(this.state.nextQuestion === undefined){
+          this.endGame();
+        } else {
         this.displayQuestions(
           this.state.questions,
           this.state.currentQuestion,
           this.state.nextQuestion,
           this.state.previousQuestion
         );
-      }
-    );
+        }
+      });
   };
 
 showoptions = ()=> {
@@ -289,7 +310,7 @@ handleFiftyFifty = ()=> {
 }
 
 startTimer = () => {
-  const countDownTime = Date.now() + 12000;
+  const countDownTime = Date.now() + 1950000;
   this.interval = setInterval(() => {
     const now = new Date();
     const distance = countDownTime - now;
@@ -305,18 +326,56 @@ startTimer = () => {
           seconds: 0
         }
       }, () => {
-        alert('Your Time has exceeded');
-        this.props.history.push('/')
+        this.endGame();
       });
     } else {
       this.setState({
         time: {
           minutes,
-          seconds
+          seconds,
+          distance
         }
       })
     }
   }, 1000)
+}
+
+handleDisabledButton = ()=>{
+  if (this.state.previousQuestion === undefined || this.state.currentQuestionIndex === 0 ){
+    this.setState({
+      previousButtonDisabled:true
+    })
+  } else {
+    this.setState({
+      previousButtonDisabled:false
+    })
+  }
+  if (this.state.nextQuestion === undefined || this.state.currentQuestionIndex +1 === this.state.numberOfQuestions){
+    this.setState({
+      nextButtonDisabled:true
+    });
+  } else {
+    this.setState({
+  nextButtonDisabled:false
+    });
+  }
+}
+
+endGame  =() => {
+  alert('Exam has ended!');
+  const { state } = this;
+  const playerStats = {
+    score: state.score,
+    numberOfQuestions: state.numberOfQuestions,
+    numberOfAnsweredQuestions: state.numberOfAnsweredQuestions,
+    correctAnswers: state.correctAnswers,
+    wrongAnswers: state.wrongAnswers,
+    fiftyFiftyUsed: 2 - state.fiftyFifty,
+    hintsUsed: 5 - state.hints
+  };
+  setTimeout(() => {
+    this.props.history.push('/play/quizSummary', playerStats);
+  }, 1000);
 }
 
   render() {
@@ -324,7 +383,7 @@ startTimer = () => {
     currentQuestionIndex,
     fiftyFifty,
     hints,
-    numberOfQuesions,
+    numberOfQuestions,
     time } =
       this.state;
     return (
@@ -335,15 +394,16 @@ startTimer = () => {
           </Helmet>
         </HelmetProvider>
         <Fragment>
-          <audio id="correct-sound" src={correctNotification}></audio>
-          <audio id="wrong-sound" src={wrongNotification}></audio>
-          <audio id="button-sound" src={buttonSound}></audio>
+          <audio ref={this.correctSound} src={correctNotification}></audio>
+          <audio ref={this.wrongSound} src={wrongNotification}></audio>
+          <audio ref={this.buttonSound} src={buttonSound}></audio>
         </Fragment>
         <div className="questions">
           <h2>Exam mode</h2>
           <div className="lifeline-container">
             <p>
-              <span onClick={this.handleFiftyFifty} className="mdi-mdi-set-center mdi-24px lifeline-icon">
+              <span onClick={this.handleFiftyFifty}
+               className="mdi-mdi-set-center mdi-24px lifeline-icon">
                 <Icon path={mdiSetCenter} size={0.8} />
                 <span className="lifeline">{fiftyFifty}</span>
               </span>
@@ -355,12 +415,17 @@ startTimer = () => {
               </span>
             </p>
           </div>
-          <div className="timer-container">
+          <div className='timer-container'>
             <p>
               <span className="left" style={{ float: "left" }}>
-                {currentQuestionIndex + 1} of {numberOfQuesions}
+                {currentQuestionIndex + 1} of {numberOfQuestions}
               </span>
-              <span className="right">{time.minutes}:{time.seconds}<span className="mdi mdi-clock-outline mdi-24px">
+              <span className={classnames('right valid', {
+              'warning': time.distance <= 120000,
+            'invalid': time.distance < 30000
+          })}>
+                {time.minutes}:{time.seconds}
+                <span className="mdi mdi-clock-outline mdi-24px">
                   <Icon path={mdiClock} size={0.8} />
                 </span>
               </span>
@@ -384,10 +449,15 @@ startTimer = () => {
             </p>
           </div>
           <div className="button-container">
-            <button id="previous-button" onClick={this.handleButtonClick}>
+            <button className={classnames('', {'disable': this.state.previousButtonDisabled})}
+             id="previous-button" 
+             onClick={this.handleButtonClick}>
               Previous
             </button>
-            <button id="next-button" onClick={this.handleButtonClick}>
+            <button
+              className={classnames('', {'disable': this.state.nextButtonDisabled})}
+             id="next-button"
+              onClick={this.handleButtonClick}>
               Next
             </button>
             <button id="quit-button" onClick={this.handleButtonClick}>
@@ -400,4 +470,4 @@ startTimer = () => {
   }
 }
 
-export default Play;
+export default Play; 
