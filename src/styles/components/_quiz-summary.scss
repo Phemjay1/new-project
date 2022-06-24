@@ -56,27 +56,41 @@
         margin-right: $sm;
         transition: 0.3s linear all;
     }
+    section ul li:nth-child(2){
+        border: 1px solid $green;
+        margin-right: $sm;
+        transition: 0.3s linear all;
+    }
+
+    section ul li:nth-child(2):hover{
+        background-color: $green;
+    }
+
     section ul li:first-child:hover{
         background-color: $blue;
     }
 
     section ul li:last-child{
-        border: 1px solid $green;
+        border: 1px solid $red;
         transition: 0.3s linear all;
     }
+
     section ul li:last-child:hover{
-        background-color: $green;
+        background-color: purple;
         color: $off-white;
+        border: none ;
     }
     .no-stats{
         color: $off-black;
         margin: $xxlg auto;
     }
+
+    
     @media  (max-width: $md-breakpoint){
         .quiz-summary{
             font-size: $sm;
             padding-left: $xs;
-            padding-right: $xs;
+            padding-right: $xs; 
         }
 
         div.container.stats{
@@ -85,5 +99,9 @@
             max-width: 100%;
             width: 100%;
         }
-    }
+
+    .body{
+            height: 100%;
+        }
+    } 
 }

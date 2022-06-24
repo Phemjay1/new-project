@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import Icon from "@mdi/react";
 import { Link } from "react-router-dom";
-import { mdiCube } from "@mdi/js";
+import { mdiBook, mdiPen } from "@mdi/js";
 
 const Home = () => (
   <Fragment>
@@ -15,7 +15,8 @@ const Home = () => (
       <section>
         <div  className="cube">
           <span>
-            <Icon path={mdiCube} size={2} spin />
+            <Icon path={mdiPen} size={2}  />
+            <Icon path={mdiBook} size={2} spin={9} />
           </span>
         </div>
         <h1>Exam App</h1>

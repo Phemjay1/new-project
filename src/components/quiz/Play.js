@@ -17,7 +17,7 @@ class Play extends Component {
     this.state = {
       questions,
       currentQuestion: {},
-      nextQuestion: {},
+      nextQuestion: {},                 
       previousQuestion: {},
       answer: "",
       numberOfQuestions: 0,
@@ -141,7 +141,7 @@ componentWillUnmount() {
   handleQuitButtonClick = () => {
     this.playButtonSound();
     if (window.confirm("Are you sure you want to quit?")) {
-      this.props.history.push('/');
+      this.props.history.push('/play/quizSummary');
     }
   };
 
@@ -310,7 +310,7 @@ handleFiftyFifty = ()=> {
 }
 
 startTimer = () => {
-  const countDownTime = Date.now() + 1950000;
+  const countDownTime = Date.now() +123000;
   this.interval = setInterval(() => {
     const now = new Date();
     const distance = countDownTime - now;
@@ -359,7 +359,7 @@ handleDisabledButton = ()=>{
   nextButtonDisabled:false
     });
   }
-}
+} 
 
 endGame  =() => {
   alert('Exam has ended!');
@@ -367,7 +367,7 @@ endGame  =() => {
   const playerStats = {
     score: state.score,
     numberOfQuestions: state.numberOfQuestions,
-    numberOfAnsweredQuestions: state.numberOfAnsweredQuestions,
+    numberOfAnsweredQuestions: state.correctAnswers + state.wrongAnswers,
     correctAnswers: state.correctAnswers,
     wrongAnswers: state.wrongAnswers,
     fiftyFiftyUsed: 2 - state.fiftyFifty,
@@ -376,7 +376,7 @@ endGame  =() => {
   setTimeout(() => {
     this.props.history.push('/play/quizSummary', playerStats);
   }, 1000);
-}
+} 
 
   render() {
     const { currentQuestion,
@@ -421,15 +421,18 @@ endGame  =() => {
                 {currentQuestionIndex + 1} of {numberOfQuestions}
               </span>
               <span className={classnames('right valid', {
-              'warning': time.distance <= 120000,
+              'warning': time.distance <= 120000
+              ,
             'invalid': time.distance < 30000
-          })}>
+            
+          }
+          )}>
                 {time.minutes}:{time.seconds}
                 <span className="mdi mdi-clock-outline mdi-24px">
                   <Icon path={mdiClock} size={0.8} />
                 </span>
               </span>
-            </p>
+            </p> 
           </div>
           <h5>{currentQuestion.question}</h5>
           <div className="options-container">
