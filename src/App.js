@@ -8,6 +8,12 @@ import QuizSummary from "./components/quiz/QuizSummary";
 import QuizSolution from "./components/quiz/QuizSolution";
 
 function App() {
+  // const [setName ] =useState('');
+
+  const fetchQuestions =()=>{
+
+  }
+
   return (
     <Router>
         <Route path="/" exact component={Home} />

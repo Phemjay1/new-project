@@ -75,7 +75,9 @@ const QuizInstructions = () => (
           <Link to="/">No! Take me back</Link>
         </span>
         <span className="right">
-          <Link to="/play/quiz">Okay! Start </Link>
+          <Link to="/play/examCategories">
+            Okay! Please select exam categories...
+          </Link>
         </span>
       </div>
     </div>

@@ -1,0 +1,19 @@
+.banner{
+    width: 85%;
+    padding: 0;
+    padding-top: 20px;
+}
+
+.settings_select{
+font-family: $quicksand;
+display: flex;
+flex-direction: column;
+padding: 20px;
+width: 60%;
+flex: 0.8;
+justify-content: space-evenly;
+};
+
+.settings{
+    width: 100%;
+}

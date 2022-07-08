@@ -310,7 +310,7 @@ handleFiftyFifty = ()=> {
 }
 
 startTimer = () => {
-  const countDownTime = Date.now() +123000;
+  const countDownTime = Date.now() + 323000;
   this.interval = setInterval(() => {
     const now = new Date();
     const distance = countDownTime - now;
